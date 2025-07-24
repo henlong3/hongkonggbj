@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>가보자 홍콩 크루즈(20단계)</title>
+    <title>홍콩 크루즈 베팅법 (20단계)</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -154,6 +154,21 @@
             overflow-x: auto;
             border-radius: 8px;
         }
+        /* 면책 조항 스타일 */
+        .disclaimer {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #3a3a3a;
+            border-radius: 8px;
+            font-size: 0.9em;
+            color: #aaaaaa;
+            text-align: center;
+            border: 1px dashed #555;
+        }
+        .disclaimer strong {
+            color: #f44336; /* 빨간색으로 경고 강조 */
+        }
+
         /* 모바일 최적화 */
         @media (max-width: 768px) {
             .container {
@@ -178,7 +193,7 @@
 </head>
 <body>
     <div class="container">
-        <h1>가보자 홍콩 크루즈</h1>
+        <h1>홍콩 크루즈 베팅법</h1>
 
         <div class="current-info">
             <div class="info-item">
@@ -224,6 +239,10 @@
                 <tbody id="bettingTableBody">
                     </tbody>
             </table>
+        </div>
+
+        <div class="disclaimer">
+            <strong>면책 조항:</strong> 본 시스템의 이용으로 발생하는 모든 결과에 대한 법적·재정적 책임은 이용자 본인에게 있으며, 운영자는 일체의 법적 책임을 지지 않습니다. 이 시스템은 시뮬레이션 목적으로만 사용되어야 합니다.
         </div>
     </div>
 
@@ -296,7 +315,7 @@
                 nextBetAmountSpan.innerText = 'N/A (최대 단계 도달)';
             }
 
-            // 현재 턴 손익은 handleBetResult에서 업데이트되므로 따로 처리하지 않음
+            currentTurnProfitSpan.innerText = currentTurnProfitSpan.innerText; // 이 값은 handleBetResult에서 설정됨
             
             cumulativeProfitSpan.innerText = cumulativeProfit;
             // 누적 손익에 따라 색상 변경
@@ -340,21 +359,24 @@
             const currentData = bettingData[currentStep - 1];
             let turnProfit = 0; // 현재 턴에서 발생한 손익
 
+            // 현재 베팅액은 항상 '패' 값으로 계산
+            const currentBetAmount = currentData['패'];
+
             if (result === 'win') {
-                turnProfit = currentData['승'] - lastBetAmount; // 이긴 금액 - 베팅한 금액
+                turnProfit = currentData['승'] - currentBetAmount; // 이긴 금액 - 베팅한 금액
                 cumulativeProfit += turnProfit;
                 consecutiveWins++;
-                showMessage(`${currentData['단계']}단계에서 승리! (이득: ${turnProfit}) 연속 승리: ${consecutiveWins}회.`);
+                showMessage(`${currentData['단계']}단계에서 승리! (이득: ${turnProfit}). 연속 승리: ${consecutiveWins}회.`);
 
                 if (consecutiveWins >= 2) {
-                    showMessage(`2연승 달성! 총 ${cumulativeProfit}의 순이익으로 시스템이 초기화됩니다.`, 7000);
+                    showMessage(`2연승 달성! 누적 순이익: ${cumulativeProfit}. 시스템이 초기화됩니다.`, 7000);
                     // 2연승 달성 시 초기화
                     resetSystem(); 
                 } else {
-                    currentStep++; // 2연승이 아니면 다음 단계로 이동 (원문 "2연승을 하면 다시 1단계부터 투자"의 해석에 따라)
+                    currentStep++; // 2연승이 아니면 다음 단계로 이동
                 }
             } else if (result === 'lose') {
-                turnProfit = -currentData['패']; // 베팅액만큼 손실
+                turnProfit = -currentBetAmount; // 베팅액만큼 손실
                 cumulativeProfit += turnProfit;
                 consecutiveWins = 0; // 패배 시 연속 승리 초기화
                 currentStep++; // 패배 시 다음 단계로 이동
@@ -378,9 +400,6 @@
                 currentTurnProfitSpan.style.color = '#ffe082'; // 기본 색상
             }
             
-            // 다음 베팅액을 위해 현재 베팅액 저장
-            lastBetAmount = currentData['패'];
-
             updateUI(); // UI 업데이트
         }
 
@@ -391,7 +410,6 @@
             currentStep = 1;
             cumulativeProfit = 0;
             consecutiveWins = 0;
-            lastBetAmount = 0;
             currentTurnProfitSpan.innerText = '0'; // 턴 이익 초기화
             currentTurnProfitSpan.classList.remove('positive', 'negative');
             currentTurnProfitSpan.style.color = '#ffe082';
